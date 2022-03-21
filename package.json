@@ -1,13 +1,14 @@
 {
-  "name": "@ludwig-pro/create-branch",
-  "version": "1.0.0",
+  "name": "@ludwig-l/create-branch",
+  "version": "0.0.1",
+  "author": "ludwig-pro",
   "description": "A CLI to create a git branch",
   "main": "build/index.js",
   "bin": {
     "create-branch": "bin/create-branch"
   },
   "publishConfig": {
-    "@ludwig-pro:registry": "https://npm.pkg.github.com"
+    "@ludwig-l:registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "test": "jest",
@@ -18,7 +19,6 @@
     "cli",
     "create-project"
   ],
-  "author": "ludwig-vantours",
   "license": "ISC",
   "dependencies": {
     "arg": "^5.0.1",
