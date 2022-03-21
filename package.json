@@ -1,5 +1,5 @@
 {
-  "name": "@demain-es/create-branch",
+  "name": "@ludwig-pro/create-branch",
   "version": "1.0.0",
   "description": "A CLI to create a git branch",
   "main": "build/index.js",
@@ -7,7 +7,7 @@
     "create-branch": "bin/create-branch"
   },
   "publishConfig": {
-    "access": "public"
+    "@ludwig-pro:registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "test": "jest",
