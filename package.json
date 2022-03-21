@@ -1,5 +1,5 @@
 {
-  "name": "@ludwig-l/create-branch",
+  "name": "@ludwig-v/create-branch",
   "version": "0.0.1",
   "author": "ludwig-pro",
   "description": "A CLI to create a git branch",
@@ -8,7 +8,7 @@
     "create-branch": "bin/create-branch"
   },
   "publishConfig": {
-    "@ludwig-l:registry": "https://npm.pkg.github.com"
+    "@ludwig-v:registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "test": "jest",
