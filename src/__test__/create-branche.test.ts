@@ -1,11 +1,12 @@
 import {
-  formatBranchName,
+  checkFormatBranchName,
   getBranchName,
   getBranchType,
 } from "../create-branch";
+import { BranchNameError } from "../types";
 
-describe("create-branch utilities", () => {
-  it("should create a branch", () => {
+describe("create-branch utilities ", () => {
+  it("getBranchType should return the correct branch type", () => {
     expect(getBranchType("feat: A new feature")).toBe("feature");
     expect(getBranchType("fix: A bug fix")).toBe("fix");
     expect(getBranchType("docs: Documentation only changes")).toBe("docs");
@@ -33,7 +34,7 @@ describe("create-branch utilities", () => {
     expect(getBranchType("unknown")).toBe("unknown");
   });
 
-  it("should return branch name correctly", () => {
+  it("getBranchName should return branch name correctly", () => {
     expect(
       getBranchName({
         author: "ludwig",
@@ -41,53 +42,138 @@ describe("create-branch utilities", () => {
         context: "context de la branche",
       })
     ).toBe("ludwig/feature/context-de-la-branche");
+    expect(
+      getBranchName({
+        author: "author",
+        type: "feat: A new feature",
+        context: "context",
+      })
+    ).toBe("author/feature/context");
   });
-  describe("formatBranchName", () => {
-    it("can include slash / for hierarchical (directory) grouping, but no slash-separated component can begin with a dot . or end with the sequence <.lock>", () => {
-      expect(formatBranchName("ludwig./type./context")).toBe(
-        "ludwig/type/context"
-      );
-      expect(formatBranchName("ludwig./type./context.lock")).toBe(
-        "ludwig/type/context"
-      );
-      expect(formatBranchName("ludwig./type.lock/context")).toBe(
-        "ludwig/type.lock/context"
-      );
-    });
-    it("branch name must contain at least one /.", () => {
+
+  describe("checkFormatBranchName", () => {
+    it("should include slash / for hierarchical (directory) grouping, but no slash-separated component can begin with a dot . or end with the sequence <.lock>", () => {
       expect(() => {
-        formatBranchName("ludwig");
+        checkFormatBranchName("ludwig./type./context");
       }).toThrow();
       expect(() => {
-        formatBranchName("ludwig");
-      }).toThrowError("branch name must contain at least one /.");
-      expect(formatBranchName("ludwig/type")).toBe("ludwig/type");
+        checkFormatBranchName("ludwig./type./context");
+      }).toThrowError(BranchNameError.dotSlashPattern);
+    });
+
+    it("should not end with the sequence .lock", () => {
+      expect(() => {
+        checkFormatBranchName("ludwig/type/context.lock");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("ludwig/type/context.lock");
+      }).toThrowError(BranchNameError.dotLockPattern);
+      expect(checkFormatBranchName("ludwig/type.lock/context")).toBeUndefined();
+    });
+
+    it("should contain at least one /.", () => {
+      expect(() => {
+        checkFormatBranchName("ludwig");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("ludwig");
+      }).toThrowError(BranchNameError.containSlash);
+    });
+
+    it("should not have two consecutive dots .. anywhere", () => {
+      expect(() => {
+        checkFormatBranchName("ludwig..vantours/type/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("ludwig..vantours/type/context");
+      }).toThrowError(BranchNameError.consecutiveDot);
+    });
+
+    it("should not contain a back slash", () => {
+      expect(() => {
+        checkFormatBranchName("author\\type/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author\\type/context");
+      }).toThrowError(BranchNameError.containBackSlash);
+    });
+
+    it("should not contain ASCII control characters", () => {
+      expect(() => {
+        checkFormatBranchName("author/ty~pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty^pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty:pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty[pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty?pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty*pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty@pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty{pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty{@pe/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/ty:pe/context");
+      }).toThrowError(BranchNameError.asciiControlChar);
+    });
+
+    it("should not begin or end with a slash /  or a dash - or a dot", () => {
+      expect(() => {
+        checkFormatBranchName(".author/type/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("-author/type/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("/author/type/context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/type/context.");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/type/context-");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/type/context/");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author/type/context/");
+      }).toThrowError(BranchNameError.startEndPattern);
+    });
+
+    it("should not contain bytes whose values are lower than 40", () => {
+      expect(() => {
+        checkFormatBranchName("²/²/²");
+      }).not.toThrow();
+      expect(() => {
+        checkFormatBranchName("²?/²?/²?");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("aut#hor/t#ype/con#text");
+      }).toThrowError(BranchNameError.asciiSpecialChar);
+    });
+
+    it("should not contain multiple consecutive slashes", () => {
+      expect(() => {
+        checkFormatBranchName("author//type//context");
+      }).toThrow();
+      expect(() => {
+        checkFormatBranchName("author//type//context");
+      }).toThrowError(BranchNameError.consecutiveSlash);
     });
   });
 });
-
-// no dot => .
-// no ASCII control characters space, tilde ~, caret ^, or colon : anywhere
-// They cannot have question-mark ?, asterisk *, or open bracket [ anywhere.
-// They cannot begin or end with a slash /  or a dash - or a dot .
-// They cannot contain @{ or @ or \
-// They cannot start with  -
-// command to check "git check-ref-format"
-
-// Git imposes the following rules on how references are named:
-
-// They cannot have two consecutive dots .. anywhere.
-
-// They cannot have ASCII control characters (i.e. bytes whose values are lower than \040, or \177 DEL), space, tilde ~, caret ^, or colon : anywhere.
-
-// They cannot have question-mark ?, asterisk *, or open bracket [ anywhere. See the --refspec-pattern option below for an exception to this rule.
-
-// They cannot begin or end with a slash / or contain multiple consecutive slashes (see the --normalize option below for an exception to this rule)
-
-// They cannot end with a dot ..
-
-// They cannot contain a sequence @{.
-
-// They cannot be the single character @.
-
-// They cannot contain a \.

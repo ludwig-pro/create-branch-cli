@@ -4,8 +4,7 @@
   "description": "A CLI to create a git branch",
   "main": "build/index.js",
   "bin": {
-    "@demain-es/create-project": "bin/create-project",
-    "create-project": "bin/create-project"
+    "create-branch": "bin/create-branch"
   },
   "publishConfig": {
     "access": "public"
@@ -23,8 +22,11 @@
   "license": "ISC",
   "dependencies": {
     "arg": "^5.0.1",
+    "chalk": "4.1.2",
+    "conf": "^10.1.1",
     "esm": "^3.2.25",
     "inquirer": "^8.2.1",
+    "listr": "^0.14.3",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
@@ -33,6 +35,7 @@
     "@babel/preset-typescript": "^7.16.7",
     "@types/inquirer": "^8.2.0",
     "@types/jest": "^27.4.1",
+    "@types/listr": "^0.14.4",
     "@types/lodash": "^4.14.180",
     "@types/node": "^17.0.21",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
@@ -41,7 +44,6 @@
     "eslint": "^8.11.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jest": "^26.1.1",
-    "eslint-plugin-node": "^11.1.0",
     "jest": "^27.5.1",
     "prettier": "2.6.0",
     "ts-node": "^10.7.0",
