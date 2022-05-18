@@ -27,7 +27,7 @@ const promptQuestions = async () => {
   questions.push({
     type: "input",
     name: "context",
-    message: "Please choose the type of branch",
+    message: "Please entre your context name",
   });
 
   const answers = await inquirer.prompt(questions);
